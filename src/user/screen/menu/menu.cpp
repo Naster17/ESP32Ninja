@@ -137,8 +137,44 @@ void Menu::menu_wifi()
 
         if (response == OK_PRESS && mainWifiI[pos] == "Scan")
             menu_scan_aps();
+        if (response == OK_PRESS && mainWifiI[pos] == "WPS Listner")
+            menu_wps();
         if (response == OK_PRESS && mainWifiI[pos] == "Settings")
             menu_settings_wifi();
+    }
+}
+
+void Menu::print(String text)
+{
+    display.fillScreen(ST7735_BLACK);
+    display.setTextColor(ST7735_GREEN);
+    display.println("\n" + text + "\n");
+    display.setTextColor(ST7735_WHITE);
+}
+
+void Menu::menu_wps()
+{
+    Attack::Wifi::wps_listner();
+    int pos = 0;
+    size_t old_size = 0;
+    frame = true;
+    while (true)
+    {
+        std::vector<String> wps_data = Attack::Wifi::wps_updates();
+        if (old_size != wps_data.size())
+        {
+            frame = true;
+            old_size = wps_data.size();
+        }
+        uint8_t response = base_menu_logic("WiFi", Drivers::Button::updates(), wps_data, pos, true);
+
+        if (response == OK_PRESS && wps_data.size() > 0)
+            print(wps_data[pos]);
+
+        if (response == FREE_PRESS) {
+            Attack::Wifi::wps_attack_stop();
+            break;
+        }
     }
 }
 
@@ -174,6 +210,7 @@ void Menu::menu_scan_aps()
         if (response == FREE_PRESS)
         {
             // Scheduler::stop_wifi_scan();
+            Drivers::Wifi::deinit();
             break;
         }
     }

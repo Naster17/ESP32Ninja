@@ -12,6 +12,13 @@
 #include "esp_wifi_types.h"
 #include "esp_netif.h"
 #include "esp_event.h"
+#include "esp_wps.h"
+
+#define ESP_WPS_MODE WPS_TYPE_PBC
+#define ESP_MANUFACTURER "ESPRESSIF"
+#define ESP_MODEL_NUMBER "ESP32"
+#define ESP_MODEL_NAME "ESPRESSIF IOT"
+#define ESP_DEVICE_NAME "ESP STATION"
 
 namespace Drivers
 {
@@ -19,7 +26,8 @@ namespace Drivers
     class Wifi
     {
     public:
-        static bool init();
+        static void init();
+        static void deinit();
         // gets
         // bool getStatus();
         // void getBSSID(uint8_t item, uint8_t *list);
@@ -31,6 +39,10 @@ namespace Drivers
         static void set_tx_power(wifi_power_t power);
         static void set_rate(bool status);
         static bool get_rate();
+        static void wps_config();
+        static void wps_start();
+        static void wps_stop();
+        static void wps_event(WiFiEvent_t event, arduino_event_info_t info);
         // wifi_power_t getTxPower();
     };
     extern Wifi wifi;
@@ -45,6 +57,9 @@ namespace Attack
         static void init();
         static void send_deauth_frame(uint8_t bssid[6], int channel, String dst_mac_str);
         static void send_deauth_frame(uint8_t bssid[6], int channel, uint8_t mac[6]);
+        static void wps_listner();
+        static std::vector<String> wps_updates();
+        static void wps_attack_stop();
     };
 }
 

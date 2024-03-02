@@ -13,11 +13,14 @@ public:
     static uint8_t base_menu_logic(String MenuName, uint8_t buttonEvent, const std::vector<String> &vec, int &pos, bool clearDisplay);
     static uint8_t base_menu_settings_logic(String MenuName, uint8_t buttonEvent, const std::map<String, std::vector<String>> &MenuI, int &pos, int &mapPos, bool clearDisplay);
 
+    static void print(String text);
+
     static void main_menu();
     static uint8_t status_bar(uint8_t buttonEvent, String text);
     static void status_line(int color);
     // menus
     static void menu_wifi();
+    static void menu_wps(); 
     static void menu_scan_aps();
     static void menu_real_time_scan_aps();
     static void menu_ap(String AP, int &apos);

