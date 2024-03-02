@@ -5,5 +5,8 @@
 <p align="center">
   <em>My Mini Setup</em>
 </p>
-
+<p align="center">
+  <a href="https://github.com/justcallmekoko/ESP32Marauder/releases/latest"><img src="https://img.shields.io/github/downloads/Naster17/ESP32Ninja/total" alt="Downloads"/></a>
+  <a href="https://www.instagram.com/naster17"><img src="https://img.shields.io/badge/Follow%20Me-Instagram-orange" alt="Instagram"/></a>
+</p>
 <h2>Build Guide: <a href="https://github.com/Naster17/ESP32Ninja/wiki/Build">Wiki</a></h2>
