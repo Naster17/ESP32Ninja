@@ -42,7 +42,7 @@ public:
     static void menu_system_check();
 
     // keyboards
-    static String num_keyboard();
+    static String num_keyboard(String input_field);
 };
 
 #endif

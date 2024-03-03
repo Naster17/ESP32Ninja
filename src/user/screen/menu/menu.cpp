@@ -121,7 +121,7 @@ void Menu::menu_bluetooth()
 {
     int pos = 0;
     frame = true;
-    std::vector<String> input_vec = {"________"};
+    std::vector<String> input_vec = {"Count: "};
     while (true)
     {
         uint8_t response = base_menu_logic("WiFi", Drivers::Button::updates(), input_vec, pos, true);
@@ -129,50 +129,60 @@ void Menu::menu_bluetooth()
         if (response == FREE_PRESS)
             break;
 
-        if (response == OK_PRESS)
-            num_keyboard();
+        if (response == OK_PRESS && input_vec[pos] == "Count: ")
+            num_keyboard(input_vec[pos]);
     }
 }
 
-String Menu::num_keyboard()
+String Menu::num_keyboard(String input_field = "> ")
 {
     frame = true;
     int posX = 0;
     int posY = 0;
-    bool run = true;
-    while (run)
+    String input = "";
+
+    int positions[][2] = {{0, 75}, {42, 75}, {84, 75}, {0, 96}, {42, 96}, {84, 96}, {0, 117}, {42, 117}, {84, 117}, {0, 138}, {42, 138}, {84, 138}};
+    char symbols[][2] = {{'1'}, {'2'}, {'3'}, {'4'}, {'5'}, {'6'}, {'7'}, {'8'}, {'9'}, {'*'}, {'0'}, {'#'}}; // feauther multi sim.
+
+    while (true)
     {
         uint8_t events = Drivers::Button::updates();
-        status_bar((posX < 0) ? events : 0, "wewe");
 
         if (frame)
         {
-            int positions_rect[][2] = {{0, 75}, {42, 75}, {84, 75}, {0, 96}, {42, 96}, {84, 96}, {0, 117}, {42, 117}, {84, 117}, {0, 138}, {42, 138}, {84, 138}};
+            status_bar((posX < 0) ? events : 0, "wewe");
 
+            display.fillRect(0, 14, SCREEN_WIDTH, 59, ST7735_BLACK);
+            display.setTextSize(1);
+            display.setTextColor(ST7735_WHITE);
+            display.setCursor(0, 16);
+            display.print(input_field);
+            display.println(input);
+
+            // draw graphic
             for (int i = 0; i < 12; i++)
             {
-                display.drawRect(positions_rect[i][0], positions_rect[i][1], 42, 22, ST7735_GRAY1);
-                display.fillRect(positions_rect[i][0], positions_rect[i][1], 40, 20, ST7735_GRAY);
+                display.drawRect(positions[i][0], positions[i][1], 42, 22, ST7735_GRAY1);
+                display.fillRect(positions[i][0], positions[i][1], 40, 20, ST7735_GRAY);
             }
+            // update graphic with curent pos
+            display.drawRect(positions[posY][0], positions[posX][1], 42, 22, ST7735_GRAY1);
+            display.fillRect(positions[posY][0], positions[posX][1], 40, 20, ST7735_WHITE);
 
-            display.drawRect(positions_rect[posY][0], positions_rect[posX][1], 42, 22, ST7735_GRAY1);
-            display.fillRect(positions_rect[posY][0], positions_rect[posX][1], 40, 20, ST7735_WHITE);
-
+            // draw symbols
             display.setTextSize(2);
             display.setTextColor(ST7735_BLACK);
-            int positions[][2] = {{15, 79}, {58, 79}, {100, 79}, {15, 100}, {58, 100}, {100, 100}, {15, 121}, {58, 121}, {100, 121}, {15, 142}, {58, 142}, {100, 142}};
-
             for (int i = 0; i < 12; i++)
             {
-                display.setCursor(positions[i][0], positions[i][1]);
+                display.setCursor(positions[i][0] + 15, positions[i][1] + 4);
 
-                if (positions[i][0] == 15 && positions[i][1] == 142)
+                if (positions[i][0] + 15 == 15 && positions[i][1] + 4 == 142)
                     display.print("*");
 
-                else if (positions[i][0] == 58 && positions[i][1] == 142)
+                else if (positions[i][0] + 15 == 57 && positions[i][1] + 4 == 142)
                     display.print(0);
 
-                else if (positions[i][0] == 100 && positions[i][1] == 142)
+                else if (positions[i][0] + 15 == 99 && positions[i][1] + 4 == 142)
                     display.print("#");
 
                 else
@@ -186,28 +196,46 @@ String Menu::num_keyboard()
         {
         case UP_PRESS:
             frame = true;
-            posX -= 1;
+            posX = (posX == 0) ? 9 : posX - 3;
             break;
+
         case DOWN_PRESS:
             frame = true;
-            posX += 1;
+            posX = (posX == 9) ? 0 : posX + 3;
             break;
+
         case LEFT_PRESS:
             frame = true;
-            posY -= 1;
+            posY = (posY == 0) ? 2 : posY - 1;
             break;
+
         case RIGHT_PRESS:
             frame = true;
-            posY += 1;
+            posY = (posY == 2) ? 0 : posY + 1;
             break;
+
         case FREE_PRESS:
+            frame = true;
             display.setTextSize(1);
             display.setTextColor(ST7735_WHITE);
-            run = false;
+            display.fillScreen(ST7735_BLACK);
             return "";
             break;
         case OK_PRESS:
             frame = true;
+
+            if (posX == 9 && posY == 0)
+                input.remove(input.length() - 1);
+            else if (posX == 9 && posY == 2)
+            {
+                display.setTextSize(1);
+                display.setTextColor(ST7735_WHITE);
+                display.fillScreen(ST7735_BLACK);
+                return input;
+            }
+            else
+                input += symbols[posX + posY][0];
+
             break;
         }
     }

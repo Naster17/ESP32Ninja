@@ -58,14 +58,14 @@ namespace Drivers
         static uint32_t debugTmr = 0;
         if (currentTime - debugTmr >= 10000)
         {
-            Serial.println("====Buttons=====");
-            Serial.println(digitalRead(BUTTON_UP));
-            Serial.println(digitalRead(BUTTON_DOWN));
-            Serial.println(digitalRead(BUTTON_LEFT));
-            Serial.println(digitalRead(BUTTON_RIGHT));
-            Serial.println(digitalRead(BUTTON_OK));
-            Serial.println(digitalRead(BUTTON_FREE));
-            Serial.println("================");
+            // Serial.println("====Buttons=====");
+            // Serial.println(digitalRead(BUTTON_UP));
+            // Serial.println(digitalRead(BUTTON_DOWN));
+            // Serial.println(digitalRead(BUTTON_LEFT));
+            // Serial.println(digitalRead(BUTTON_RIGHT));
+            // Serial.println(digitalRead(BUTTON_OK));
+            // Serial.println(digitalRead(BUTTON_FREE));
+            // Serial.println("================");
 
             debugTmr = millis();
         }
