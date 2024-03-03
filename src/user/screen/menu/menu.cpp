@@ -19,8 +19,7 @@ void Menu::main_menu()
 
     if (response == OK_PRESS && mainMenuI[mainPos] == "Bluetooth")
     {
-        // Drivers::Blue::init_keyboard();
-        // Drivers::Blue::test();
+        menu_bluetooth();
     }
     if (response == OK_PRESS && mainMenuI[mainPos] == "BLE")
         menu_ble();
@@ -106,12 +105,6 @@ uint8_t Menu::status_bar(uint8_t buttonEvent, String text)
         display.drawBitmap(SCREEN_WIDTH - 65, 1, brit_img, 10, 10, ST7735_BLACK);
         if (posH == 1)
             display.drawRect(SCREEN_WIDTH - 66, 0, 12, 12, ST7735_RED);
-
-        // text
-        display.setCursor(2, 3); // 10x128 = 2+6+2=10 status bar size
-        display.setTextColor(ST7735_BLACK);
-        display.println(text);
-        display.setTextColor(ST7735_WHITE);
     }
     return 0;
 }
@@ -120,6 +113,104 @@ void Menu::status_line(int color = ST7735_BLACK)
 {
     if (frame)
         display.fillRect(0, SCREEN_HEIGHT - 2, SCREEN_WIDTH, 2, color); // last 3 pixels in down
+}
+
+///
+
+void Menu::menu_bluetooth()
+{
+    int pos = 0;
+    frame = true;
+    std::vector<String> input_vec = {"________"};
+    while (true)
+    {
+        uint8_t response = base_menu_logic("WiFi", Drivers::Button::updates(), input_vec, pos, true);
+
+        if (response == FREE_PRESS)
+            break;
+
+        if (response == OK_PRESS)
+            num_keyboard();
+    }
+}
+
+String Menu::num_keyboard()
+{
+    frame = true;
+    int posX = 0;
+    int posY = 0;
+    bool run = true;
+    while (run)
+    {
+        uint8_t events = Drivers::Button::updates();
+        status_bar((posX < 0) ? events : 0, "wewe");
+
+        if (frame)
+        {
+            int positions_rect[][2] = {{0, 75}, {42, 75}, {84, 75}, {0, 96}, {42, 96}, {84, 96}, {0, 117}, {42, 117}, {84, 117}, {0, 138}, {42, 138}, {84, 138}};
+
+            for (int i = 0; i < 12; i++)
+            {
+                display.drawRect(positions_rect[i][0], positions_rect[i][1], 42, 22, ST7735_GRAY1);
+                display.fillRect(positions_rect[i][0], positions_rect[i][1], 40, 20, ST7735_GRAY);
+            }
+
+            display.drawRect(positions_rect[posY][0], positions_rect[posX][1], 42, 22, ST7735_GRAY1);
+            display.fillRect(positions_rect[posY][0], positions_rect[posX][1], 40, 20, ST7735_WHITE);
+
+            display.setTextSize(2);
+            display.setTextColor(ST7735_BLACK);
+            int positions[][2] = {{15, 79}, {58, 79}, {100, 79}, {15, 100}, {58, 100}, {100, 100}, {15, 121}, {58, 121}, {100, 121}, {15, 142}, {58, 142}, {100, 142}};
+
+            for (int i = 0; i < 12; i++)
+            {
+                display.setCursor(positions[i][0], positions[i][1]);
+
+                if (positions[i][0] == 15 && positions[i][1] == 142)
+                    display.print("*");
+
+                else if (positions[i][0] == 58 && positions[i][1] == 142)
+                    display.print(0);
+
+                else if (positions[i][0] == 100 && positions[i][1] == 142)
+                    display.print("#");
+
+                else
+                    display.print(i + 1);
+            }
+
+            frame = false;
+        }
+
+        switch (events)
+        {
+        case UP_PRESS:
+            frame = true;
+            posX -= 1;
+            break;
+        case DOWN_PRESS:
+            frame = true;
+            posX += 1;
+            break;
+        case LEFT_PRESS:
+            frame = true;
+            posY -= 1;
+            break;
+        case RIGHT_PRESS:
+            frame = true;
+            posY += 1;
+            break;
+        case FREE_PRESS:
+            display.setTextSize(1);
+            display.setTextColor(ST7735_WHITE);
+            run = false;
+            return "";
+            break;
+        case OK_PRESS:
+            frame = true;
+            break;
+        }
+    }
 }
 
 ///
@@ -171,7 +262,8 @@ void Menu::menu_wps()
         if (response == OK_PRESS && wps_data.size() > 0)
             print(wps_data[pos]);
 
-        if (response == FREE_PRESS) {
+        if (response == FREE_PRESS)
+        {
             Attack::Wifi::wps_attack_stop();
             break;
         }

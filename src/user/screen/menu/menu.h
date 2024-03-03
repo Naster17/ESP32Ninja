@@ -18,14 +18,16 @@ public:
     static void main_menu();
     static uint8_t status_bar(uint8_t buttonEvent, String text);
     static void status_line(int color);
-    // menus
+    // wifi
     static void menu_wifi();
-    static void menu_wps(); 
+    static void menu_wps();
     static void menu_scan_aps();
     static void menu_real_time_scan_aps();
     static void menu_ap(String AP, int &apos);
     static void menu_deauth_ap(String macStr, uint8_t channel);
     static void menu_settings_wifi();
+    // bluetooth
+    static void menu_bluetooth();
     // Ir
     static void menu_ir();
     // ble
@@ -38,6 +40,9 @@ public:
     // apps
     static void menu_apps();
     static void menu_system_check();
+
+    // keyboards
+    static String num_keyboard();
 };
 
 #endif
