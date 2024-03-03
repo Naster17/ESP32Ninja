@@ -15,9 +15,11 @@ const std::vector<String> mainWifiI = {"Scan", "Deauth", "Probe", "Beacon", "WPS
 const std::vector<String> mainAPI = {"Deauth", "Probe", "Sniff", "EVIL AP", "PMKID", "EAPOL", "Add2Beacon"};
 const std::vector<String> mainEAPOLI = {"Active capture", "Passive capture"};
 
-const std::map<String, std::vector<String>> munuSettingWifiI = {
+static std::map<String, std::vector<String>> menuSettingWifiI = {
+    {"Deauth count", {":100"}},
+    {"Deauth delay", {":50"}},
     {"Rate", {"Off", "On"}},
-    {"TX Power", {"20dbm", "19dbm", "17dbm", "15dbm", "13dbm", "11dbm", "7dbm", "5dbm", "2dbm"}},
+    {"TX Power", {"20dbm", "19dbm", "17dbm", "15dbm", "13dbm", "11dbm", "7dbm", "5dbm", "2dbm"}}
 };
 // Bluetooth
 const std::vector<String> mainBuetootheI = {"Scan", "Detect", "Settings"};

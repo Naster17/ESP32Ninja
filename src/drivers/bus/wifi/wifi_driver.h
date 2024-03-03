@@ -55,6 +55,12 @@ namespace Attack
     {
     public:
         static void init();
+        static void start_deauth(String mac_str, uint8_t channel);
+        static void stop_deauth();
+        static void set_deauth_count(int count);
+        static void set_deauth_delay(int timeout);
+        static int get_deauth_count();
+        static int get_deauth_delay();
         static void send_deauth_frame(uint8_t bssid[6], int channel, String dst_mac_str);
         static void send_deauth_frame(uint8_t bssid[6], int channel, uint8_t mac[6]);
         static void wps_listner();

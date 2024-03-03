@@ -105,6 +105,11 @@ uint8_t Menu::status_bar(uint8_t buttonEvent, String text)
         display.drawBitmap(SCREEN_WIDTH - 65, 1, brit_img, 10, 10, ST7735_BLACK);
         if (posH == 1)
             display.drawRect(SCREEN_WIDTH - 66, 0, 12, 12, ST7735_RED);
+
+        // silent
+        display.drawBitmap(SCREEN_WIDTH - 76, 1, silent, 10, 10, ST7735_BLACK);
+        if (posH == 9)
+            display.drawRect(SCREEN_WIDTH - 77, 0, 12, 12, ST7735_RED);
     }
     return 0;
 }
@@ -129,115 +134,8 @@ void Menu::menu_bluetooth()
         if (response == FREE_PRESS)
             break;
 
-        if (response == OK_PRESS && input_vec[pos] == "Count: ")
-            num_keyboard(input_vec[pos]);
-    }
-}
-
-String Menu::num_keyboard(String input_field = "> ")
-{
-    frame = true;
-    int posX = 0;
-    int posY = 0;
-    String input = "";
-
-    int positions[][2] = {{0, 75}, {42, 75}, {84, 75}, {0, 96}, {42, 96}, {84, 96}, {0, 117}, {42, 117}, {84, 117}, {0, 138}, {42, 138}, {84, 138}};
-    char symbols[][2] = {{'1'}, {'2'}, {'3'}, {'4'}, {'5'}, {'6'}, {'7'}, {'8'}, {'9'}, {'*'}, {'0'}, {'#'}}; // feauther multi sim.
-
-    while (true)
-    {
-        uint8_t events = Drivers::Button::updates();
-
-        if (frame)
-        {
-            status_bar((posX < 0) ? events : 0, "wewe");
-
-            display.fillRect(0, 14, SCREEN_WIDTH, 59, ST7735_BLACK);
-            display.setTextSize(1);
-            display.setTextColor(ST7735_WHITE);
-            display.setCursor(0, 16);
-            display.print(input_field);
-            display.println(input);
-
-            // draw graphic
-            for (int i = 0; i < 12; i++)
-            {
-                display.drawRect(positions[i][0], positions[i][1], 42, 22, ST7735_GRAY1);
-                display.fillRect(positions[i][0], positions[i][1], 40, 20, ST7735_GRAY);
-            }
-            // update graphic with curent pos
-            display.drawRect(positions[posY][0], positions[posX][1], 42, 22, ST7735_GRAY1);
-            display.fillRect(positions[posY][0], positions[posX][1], 40, 20, ST7735_WHITE);
-
-            // draw symbols
-            display.setTextSize(2);
-            display.setTextColor(ST7735_BLACK);
-            for (int i = 0; i < 12; i++)
-            {
-                display.setCursor(positions[i][0] + 15, positions[i][1] + 4);
-
-                if (positions[i][0] + 15 == 15 && positions[i][1] + 4 == 142)
-                    display.print("*");
-
-                else if (positions[i][0] + 15 == 57 && positions[i][1] + 4 == 142)
-                    display.print(0);
-
-                else if (positions[i][0] + 15 == 99 && positions[i][1] + 4 == 142)
-                    display.print("#");
-
-                else
-                    display.print(i + 1);
-            }
-
-            frame = false;
-        }
-
-        switch (events)
-        {
-        case UP_PRESS:
-            frame = true;
-            posX = (posX == 0) ? 9 : posX - 3;
-            break;
-
-        case DOWN_PRESS:
-            frame = true;
-            posX = (posX == 9) ? 0 : posX + 3;
-            break;
-
-        case LEFT_PRESS:
-            frame = true;
-            posY = (posY == 0) ? 2 : posY - 1;
-            break;
-
-        case RIGHT_PRESS:
-            frame = true;
-            posY = (posY == 2) ? 0 : posY + 1;
-            break;
-
-        case FREE_PRESS:
-            frame = true;
-            display.setTextSize(1);
-            display.setTextColor(ST7735_WHITE);
-            display.fillScreen(ST7735_BLACK);
-            return "";
-            break;
-        case OK_PRESS:
-            frame = true;
-
-            if (posX == 9 && posY == 0)
-                input.remove(input.length() - 1);
-            else if (posX == 9 && posY == 2)
-            {
-                display.setTextSize(1);
-                display.setTextColor(ST7735_WHITE);
-                display.fillScreen(ST7735_BLACK);
-                return input;
-            }
-            else
-                input += symbols[posX + posY][0];
-
-            break;
-        }
+        if (response == OK_PRESS && input_vec[pos].indexOf("Count") != -1)
+            input_vec[pos] = input_vec[pos].substring(0, input_vec[pos].indexOf(':') + 1) + num_keyboard(input_vec[pos].substring(0, input_vec[pos].indexOf(':') + 1));
     }
 }
 
@@ -384,32 +282,28 @@ void Menu::menu_ap(String AP, int &apos)
     }
 }
 
-void Menu::menu_deauth_ap(String macStr, uint8_t channel)
+void Menu::menu_deauth_ap(String mac_str, uint8_t channel)
 {
-    // //  куда = кто логика глушения перепутана местами куда в ff:ff... кто мак цели
-    String dst_mac = "ff:ff:ff:ff:ff:ff";
-    byte src_mac[6];
-    // byte src_mac[6] = {0x3E, 0x52, 0xA1, 0x1E, 0x09, 0xA0};
-    int packets = 0;
-    for (int i = 0; i < 6; i++)
-    {
-        src_mac[i] = strtoul(macStr.substring(i * 3, i * 3 + 2).c_str(), NULL, 16);
-    }
+
+    uint32_t tmr = 0;
 
     // Serial.println(ieee80211_raw_frame_sanity_check(31337, 0, 0));
-    Attack::Wifi::init();
-    while (1)
+    for (int i = 0; i < Attack::Wifi::get_deauth_count(); i++)
     {
-        uint8_t buttonEvent = Drivers::Button::updates();
-        if (buttonEvent == FREE_PRESS)
-            break;
+        Attack::Wifi::start_deauth(mac_str, channel);
 
-        display.fillScreen(ST7735_BLACK);
-        display.setCursor(0, 14);
-        display.println("Deauthing: " + String(packets));
-        Attack::Wifi::send_deauth_frame(src_mac, channel, dst_mac);
-        delay(50);
-        packets++;
+        if (Drivers::Button::updates() == FREE_PRESS)
+        {
+            Attack::Wifi::stop_deauth();
+            break;
+        }
+
+        if (millis() - tmr >= 100)
+        {
+            display.fillScreen(ST7735_BLACK);
+            display.setCursor(0, 14);
+            display.println("Deauthing: " + String(i));
+        }
     }
 }
 
@@ -422,10 +316,10 @@ void Menu::menu_settings_wifi()
 
     while (1)
     {
-        uint8_t response = base_menu_settings_logic("Settings", Drivers::Button::updates(), munuSettingWifiI, posHH, mapPos, true);
-
+        Serial.println("cccc");
+        uint8_t response = base_menu_logic("Settings", Drivers::Button::updates(), menuSettingWifiI, posHH, mapPos, true);
         // rate
-        if (posHH == 0 && !printedRate[mapPos])
+        if (posHH == 2 && !printedRate[mapPos])
         {
             printedRate[mapPos] = true;
 
@@ -443,7 +337,7 @@ void Menu::menu_settings_wifi()
             }
         }
         // TX power
-        if (posHH == 1 && !printedTXPower[mapPos])
+        if (posHH == 3 && !printedTXPower[mapPos])
         {
             if (mapPos == 0)
                 DBus::wifi.set_tx_power(WIFI_POWER_19_5dBm);
@@ -469,6 +363,25 @@ void Menu::menu_settings_wifi()
             for (int i = 0; i < 9; ++i)
                 if (i != mapPos)
                     printedTXPower[i] = false;
+        }
+
+        // Deauth count
+        if (posHH == 0 && response == OK_PRESS)
+        {
+            String data = num_keyboard();
+            menuSettingWifiI["Deauth count"][0] = ":" + data;
+            Attack::Wifi::set_deauth_count(data.toInt());
+            Serial.println("aaaa");
+            delay(50);
+        }
+        // Deauth delay
+        if (posHH == 1 && response == OK_PRESS)
+        {
+            String data = num_keyboard();
+            menuSettingWifiI["Deauth delay"][0] = ":" + data;
+            Attack::Wifi::set_deauth_delay(data.toInt());
+            Serial.println("bbb");
+            delay(50);
         }
 
         if (response == FREE_PRESS)
@@ -645,6 +558,115 @@ void Menu::menu_system_check()
     }
 }
 
+/// Keyboards
+
+String Menu::num_keyboard(String input_field)
+{
+    frame = true;
+    int posX = 0;
+    int posY = 0;
+    String input = "";
+
+    int positions[][2] = {{0, 75}, {42, 75}, {84, 75}, {0, 96}, {42, 96}, {84, 96}, {0, 117}, {42, 117}, {84, 117}, {0, 138}, {42, 138}, {84, 138}};
+    char symbols[][2] = {{'1'}, {'2'}, {'3'}, {'4'}, {'5'}, {'6'}, {'7'}, {'8'}, {'9'}, {'*'}, {'0'}, {'#'}}; // feauther multi sim.
+
+    while (true)
+    {
+        uint8_t events = Drivers::Button::updates();
+
+        if (frame)
+        {
+            status_bar((posX < 0) ? events : 0, "wewe");
+
+            display.fillRect(0, 14, SCREEN_WIDTH, 59, ST7735_BLACK);
+            display.setTextSize(1);
+            display.setTextColor(ST7735_WHITE);
+            display.setCursor(0, 16);
+            display.print(input_field);
+            display.println(input);
+
+            // draw graphic
+            for (int i = 0; i < 12; i++)
+            {
+                display.drawRect(positions[i][0], positions[i][1], 42, 22, ST7735_GRAY1);
+                display.fillRect(positions[i][0], positions[i][1], 40, 20, ST7735_GRAY);
+            }
+            // update graphic with curent pos
+            display.drawRect(positions[posY][0], positions[posX][1], 42, 22, ST7735_GRAY1);
+            display.fillRect(positions[posY][0], positions[posX][1], 40, 20, ST7735_WHITE);
+
+            // draw symbols
+            display.setTextSize(2);
+            display.setTextColor(ST7735_BLACK);
+            for (int i = 0; i < 12; i++)
+            {
+                display.setCursor(positions[i][0] + 15, positions[i][1] + 4);
+
+                if (positions[i][0] + 15 == 15 && positions[i][1] + 4 == 142)
+                    display.print("*");
+
+                else if (positions[i][0] + 15 == 57 && positions[i][1] + 4 == 142)
+                    display.print(0);
+
+                else if (positions[i][0] + 15 == 99 && positions[i][1] + 4 == 142)
+                    display.print("#");
+
+                else
+                    display.print(i + 1);
+            }
+
+            frame = false;
+        }
+
+        switch (events)
+        {
+        case UP_PRESS:
+            frame = true;
+            posX = (posX == 0) ? 9 : posX - 3;
+            break;
+
+        case DOWN_PRESS:
+            frame = true;
+            posX = (posX == 9) ? 0 : posX + 3;
+            break;
+
+        case LEFT_PRESS:
+            frame = true;
+            posY = (posY == 0) ? 2 : posY - 1;
+            break;
+
+        case RIGHT_PRESS:
+            frame = true;
+            posY = (posY == 2) ? 0 : posY + 1;
+            break;
+
+        case FREE_PRESS:
+            frame = true;
+            display.setTextSize(1);
+            display.setTextColor(ST7735_WHITE);
+            display.fillScreen(ST7735_BLACK);
+            return "";
+            break;
+        case OK_PRESS:
+            frame = true;
+
+            if (posX == 9 && posY == 0)
+                input.remove(input.length() - 1);
+            else if (posX == 9 && posY == 2)
+            {
+                display.setTextSize(1);
+                display.setTextColor(ST7735_WHITE);
+                display.fillScreen(ST7735_BLACK);
+                return input;
+            }
+            else
+                input += symbols[posX + posY][0];
+
+            break;
+        }
+    }
+}
+
 /// Logics
 
 uint8_t Menu::base_menu_logic(String MenuName, uint8_t buttonEvent, const std::vector<String> &vec, int &pos, bool clearDisplay)
@@ -742,7 +764,7 @@ uint8_t Menu::base_menu_logic(String MenuName, uint8_t buttonEvent, const std::v
     return 0;
 }
 
-uint8_t Menu::base_menu_settings_logic(String MenuName, uint8_t buttonEvent, const std::map<String, std::vector<String>> &MenuI, int &pos, int &mapPos, bool clearDisplay)
+uint8_t Menu::base_menu_logic(String MenuName, uint8_t buttonEvent, const std::map<String, std::vector<String>> &MenuI, int &pos, int &mapPos, bool clearDisplay)
 {
     static int page = 0;
 
@@ -755,25 +777,40 @@ uint8_t Menu::base_menu_settings_logic(String MenuName, uint8_t buttonEvent, con
         for (auto it = MenuI.begin(); it != MenuI.end(); ++it)
         {
             String current = it->first;
-            // Добавление "> " к текущему элементу, если pos равен его позиции
+
             if (pos == std::distance(MenuI.begin(), it))
             {
                 mapPos = (mapPos < it->second.size() && mapPos >= 0) ? mapPos : 0;
-                current = "> " + current;
+                current = "|" + current;
 
-                for (int i = 0; i < maxSym - (current.length() + it->second[mapPos].length() + 4); i++)
-                    current += " ";
+                // for (int i = 0; i < maxSym - (current.length() + it->second[mapPos].length() + 4); i++)
+                //     current += " ";
 
-                display.println(current + "< " + it->second[mapPos] + " >");
+                if (it->second[0][0] == ':')
+                {
+                    display.println(current + "[" + it->second[mapPos].substring(1) + "]");
+                }
+                else
+                {
+                    display.println(current + "<" + it->second[mapPos] + ">");
+                }
             }
 
             else
             {
-                for (int i = 0; i < maxSym - (current.length() + it->second[0].length() + 4); ++i)
+                // for (int i = 0; i < maxSym - (current.length() + it->second[0].length() + 4); ++i)
+                // {
+                //     current += " ";
+                // }
+
+                if (it->second[0][0] == ':')
                 {
-                    current += " ";
+                    display.println(current + "[" + it->second[0].substring(1) + "]");
                 }
-                display.println(current + "< " + it->second[0] + " >");
+                else
+                {
+                    display.println(current + "<" + it->second[0] + ">");
+                }
             }
         }
         frame = false;
@@ -843,11 +880,11 @@ uint8_t Menu::base_menu_settings_logic(String MenuName, uint8_t buttonEvent, con
         mapPos++;
         break;
 
-        // case OK_PRESS:
-        //     if (clearDisplay)
-        //         display.fillScreen(ST7735_BLACK);
-        //     if (pos >= 0)
-        //         return OK_PRESS;
+    case OK_PRESS:
+        if (clearDisplay)
+            display.fillScreen(ST7735_BLACK);
+        if (pos >= 0)
+            return OK_PRESS;
 
     case FREE_PRESS:
         frame = true;

