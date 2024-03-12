@@ -64,7 +64,7 @@ uint8_t Menu::status_bar(uint8_t buttonEvent, String text)
         }
         if (posH == 2)
         {
-            rotate();
+            rotate(1);
         }
         else if (posH == 3)
             ESP.restart();

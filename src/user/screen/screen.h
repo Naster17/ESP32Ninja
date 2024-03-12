@@ -27,7 +27,7 @@ public:
     static bool deinit();
     static void brightness(uint8_t stat);
     static void bootinfo();
-    static void rotate();
+    static void rotate(uint8_t m);
 };
 
 #endif

@@ -24,7 +24,9 @@ bool Screen::deinit()
 void Screen::bootinfo()
 {
     display.fillScreen(ST7735_BLACK);
-    display.println("wewe");
+    display.println("Welcome to GRUB :)\n[INFO] Loading system...\n[OK] Init ok...\n[INFO] Start session...\n[INFO] Click OK to start");
+    delay(500);
+    display.fillScreen(ST7735_BLACK);
 }
 
 // 50, 100, 150, 200, 250 or analog 0-254
@@ -34,24 +36,28 @@ void Screen::brightness(uint8_t stat)
     analogWrite(TFT_LED, stat); // Включаем подсветку
 }
 
-void Screen::rotate()
+void Screen::rotate(uint8_t m)
 {
     if (SCREEN_HEIGHT == 160)
     {
-        Drivers::Button::rotate(1);
-        display.setRotation(1);
         SCREEN_WIDTH = 160;
         SCREEN_HEIGHT = 128;
+        Serial.println(SCREEN_WIDTH);
+        Serial.println(SCREEN_HEIGHT);
         crat = 14; // max ITEMS on display
         maxSym = 26;
+        Drivers::Button::rotate(m);
+        display.setRotation(m);
     }
     else
     {
-        Drivers::Button::rotate(0);
-        display.setRotation(0);
         SCREEN_WIDTH = 128;
         SCREEN_HEIGHT = 160;
+        Serial.println(SCREEN_WIDTH);
+        Serial.println(SCREEN_HEIGHT);
         crat = 18; // max ITEMS on display
         maxSym = 21;
+        Drivers::Button::rotate(0);
+        display.setRotation(0);
     }
 }

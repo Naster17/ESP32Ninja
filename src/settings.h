@@ -23,6 +23,8 @@
 #define TFT_SCL 18 // Пин для SCK
 #define TFT_LED 15 // Пример пина на ESP32 для управления подсветкой дисплея
 
+#define SD_CS_PIN 5
+
 /* PRESS CODES */
 #define UP_PRESS 1
 #define DOWN_PRESS 2

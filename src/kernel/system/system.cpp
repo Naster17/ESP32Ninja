@@ -20,10 +20,13 @@ namespace System
         esp_sleep_enable_ext0_wakeup((gpio_num_t)BUTTON_OK_PIN, LOW);
 
         if (!Drivers::Button::init())
-            return INIT_ERROR_BUTTONS;
+            Serial.println("Button init fail");
 
         if (!Screen::init())
-            return INIT_ERROR_SCREEN;
+            Serial.println("Screen init fail");
+
+        if (!Fs::init())
+            Serial.println("Fs init fail");
 
         return true;
     }
@@ -31,8 +34,8 @@ namespace System
     bool wake_up()
     {
         status = true;
-        Screen::init();
         delay(300);
+        Screen::init();
         return true;
     }
 

@@ -5,6 +5,7 @@
 
 #include "drivers/dbus/dbus_driver.h"
 #include "user/screen/screen.h"
+#include "filesystem/filesystem.h"
 
 namespace System
 {
