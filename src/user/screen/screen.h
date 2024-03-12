@@ -7,10 +7,10 @@
 
 #include "drivers/dbus/dbus_driver.h"
 
-static uint8_t SCREEN_WIDTH = 128;
-static uint8_t SCREEN_HEIGHT = 160;
-static uint8_t crat = 18;
-static uint8_t maxSym = 21;
+static int _SCREEN_WIDTH = 128;
+static int _SCREEN_HEIGHT = 160;
+static int crat = 18;
+static int maxSym = 21;
 
 // custom colors
 #define ST7735_GRAY 0x8410

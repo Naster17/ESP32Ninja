@@ -32,9 +32,12 @@ void Menu::main_menu()
 
     if (response == OK_PRESS && mainMenuI[mainPos] == "Apps")
         menu_apps();
+
+    if (response == OK_PRESS && mainMenuI[mainPos] == "Explorer")
+        menu_explorer();
 }
 
-uint8_t Menu::status_bar(uint8_t buttonEvent, String text)
+uint8_t Menu::status_bar(uint8_t buttonEvent)
 {
     static uint8_t posH = 0;
 
@@ -78,46 +81,48 @@ uint8_t Menu::status_bar(uint8_t buttonEvent, String text)
 
     if (frame)
     {
-        display.fillRect(0, 0, SCREEN_WIDTH, 12, ST7735_GRAY1); // aka 10 : 11-1pixel fill
-        display.drawFastHLine(0, 12, SCREEN_WIDTH, ST7735_WHITE);
+        display.fillRect(0, 0, _SCREEN_WIDTH, 12, ST7735_GRAY1); // aka 10 : 11-1pixel fill
+        display.drawFastHLine(0, 12, _SCREEN_WIDTH, ST7735_WHITE);
 
         // bat
-        display.drawBitmap(SCREEN_WIDTH - 21, 1, battery1_img, 20, 10, ST7735_BLACK);
+        display.drawBitmap(_SCREEN_WIDTH - 21, 1, battery1_img, 20, 10, ST7735_BLACK);
         if (posH == 5)
-            display.drawRect(SCREEN_WIDTH - 22, 0, 22, 12, ST7735_RED);
+            display.drawRect(_SCREEN_WIDTH - 22, 0, 22, 12, ST7735_RED);
 
         // bluetooth
-        display.drawBitmap(SCREEN_WIDTH - 32, 1, bluetooth_img, 10, 10, ST7735_BLACK);
+        display.drawBitmap(_SCREEN_WIDTH - 32, 1, bluetooth_img, 10, 10, ST7735_BLACK);
         if (posH == 4)
-            display.drawRect(SCREEN_WIDTH - 33, 0, 12, 12, ST7735_RED);
+            display.drawRect(_SCREEN_WIDTH - 33, 0, 12, 12, ST7735_RED);
 
         // reboot
-        display.drawBitmap(SCREEN_WIDTH - 43, 1, reboot_img, 10, 10, ST7735_BLACK);
+        display.drawBitmap(_SCREEN_WIDTH - 43, 1, reboot_img, 10, 10, ST7735_BLACK);
         if (posH == 3)
-            display.drawRect(SCREEN_WIDTH - 44, 0, 12, 12, ST7735_RED);
+            display.drawRect(_SCREEN_WIDTH - 44, 0, 12, 12, ST7735_RED);
 
         // rotate
-        display.drawBitmap(SCREEN_WIDTH - 54, 1, rotate_img, 10, 10, ST7735_BLACK);
+        display.drawBitmap(_SCREEN_WIDTH - 54, 1, rotate_img, 10, 10, ST7735_BLACK);
         if (posH == 2)
-            display.drawRect(SCREEN_WIDTH - 55, 0, 12, 12, ST7735_RED);
+            display.drawRect(_SCREEN_WIDTH - 55, 0, 12, 12, ST7735_RED);
 
         // brit
-        display.drawBitmap(SCREEN_WIDTH - 65, 1, brit_img, 10, 10, ST7735_BLACK);
+        display.drawBitmap(_SCREEN_WIDTH - 65, 1, brit_img, 10, 10, ST7735_BLACK);
         if (posH == 1)
-            display.drawRect(SCREEN_WIDTH - 66, 0, 12, 12, ST7735_RED);
+            display.drawRect(_SCREEN_WIDTH - 66, 0, 12, 12, ST7735_RED);
 
         // silent
-        display.drawBitmap(SCREEN_WIDTH - 76, 1, silent, 10, 10, ST7735_BLACK);
+        display.drawBitmap(_SCREEN_WIDTH - 76, 1, silent, 10, 10, ST7735_BLACK);
         if (posH == 9)
-            display.drawRect(SCREEN_WIDTH - 77, 0, 12, 12, ST7735_RED);
+            display.drawRect(_SCREEN_WIDTH - 77, 0, 12, 12, ST7735_RED);
     }
+    display.setCursor(0, 14);
+
     return 0;
 }
 
 void Menu::status_line(int color = ST7735_BLACK)
 {
     if (frame)
-        display.fillRect(0, SCREEN_HEIGHT - 2, SCREEN_WIDTH, 2, color); // last 3 pixels in down
+        display.fillRect(0, _SCREEN_HEIGHT - 2, _SCREEN_WIDTH, 2, color); // last 3 pixels in down
 }
 
 ///
@@ -399,16 +404,17 @@ void Menu::menu_ir()
     {
         uint8_t response = base_menu_logic("IR", Drivers::Button::updates(), mainIrI, pos, true);
 
+#ifdef ENABLE_IR
         if (response == OK_PRESS && mainIrI[pos] == "Send")
             Drivers::IR::transmitter();
         if (response == OK_PRESS && mainIrI[pos] == "Receive")
             Drivers::IR::receiver();
+#endif
 
         if (response == FREE_PRESS)
             break;
     }
 }
-
 ///
 
 void Menu::menu_ble()
@@ -539,14 +545,14 @@ void Menu::menu_system_check()
             // if (wlan.getStatus())
             // {
             //     display.setCursor(0, 13);
-            //     display.fillRect(0, 12, SCREEN_WIDTH, 8, ST7735_GREEN); // aka 10 : 11-1pixel fill
+            //     display.fillRect(0, 12, _SCREEN_WIDTH, 8, ST7735_GREEN); // aka 10 : 11-1pixel fill
             //     display.println("WiFi");
             // }
             // else
             // {
             //     display.setCursor(0, 13);
-            //     display.fillRect(0, 12, SCREEN_WIDTH, 8, ST7735_RED); // aka 10 : 11-1pixel fill
-            //     display.drawFastHLine(0, 18, SCREEN_WIDTH, ST7735_GRAY1);
+            //     display.fillRect(0, 12, _SCREEN_WIDTH, 8, ST7735_RED); // aka 10 : 11-1pixel fill
+            //     display.drawFastHLine(0, 18, _SCREEN_WIDTH, ST7735_GRAY1);
             //     display.println("WiFi");
             // }
         }
@@ -576,9 +582,9 @@ String Menu::num_keyboard(String input_field)
 
         if (frame)
         {
-            status_bar((posX < 0) ? events : 0, "wewe");
+            status_bar((posX < 0) ? events : 0);
 
-            display.fillRect(0, 14, SCREEN_WIDTH, 59, ST7735_BLACK);
+            display.fillRect(0, 14, _SCREEN_WIDTH, 59, ST7735_BLACK);
             display.setTextSize(1);
             display.setTextColor(ST7735_WHITE);
             display.setCursor(0, 16);
@@ -667,13 +673,103 @@ String Menu::num_keyboard(String input_field)
     }
 }
 
+void Menu::menu_explorer() {
+    
+}
+
 /// Logics
+
+// by v2
+uint8_t Menu::base_menu_image_logic(uint8_t buttonEvent, const std::vector<String> &vec, const std::map<String, String> &dataset, bool d_clear)
+{
+    static int pos{0};
+    static int page{0};
+
+    status_bar((pos < 0) ? buttonEvent : 0);
+
+    if (frame)
+    {
+        for (uint8_t i = page; i < min(page + crat, (uint8_t)vec.size()); i++)
+        {
+            const String &currentStr = vec[i];
+            uint8_t maxChar = (i == pos) ? maxSym - 2 : maxSym;
+            display.print((i == pos) ? "|" : "");
+            display.println(currentStr.substring(0, min(currentStr.length(), maxChar)));
+        }
+        frame = false;
+    }
+
+    switch (buttonEvent)
+    {
+    case UP_PRESS:
+        frame = true;
+        if (d_clear)
+            display.fillScreen(ST7735_BLACK);
+
+        pos--;
+        if (pos > 0)
+        {
+            if (pos < page)
+            {
+                if (page >= crat)
+                    page -= crat;
+                else
+                    page = 0;
+            }
+        }
+        break;
+
+    case DOWN_PRESS:
+        frame = true;
+        if (d_clear)
+            display.fillScreen(ST7735_BLACK);
+
+        if (pos < vec.size() - 1)
+        {
+            pos++;
+            if (pos >= page + crat)
+                page += crat;
+        }
+        else
+        {
+            pos = 0;
+            page = 0;
+        }
+        break;
+
+    case OK_PRESS:
+        frame = true;
+        Serial.println("Menu ok");
+        if (d_clear)
+            display.fillScreen(ST7735_BLACK);
+        if (pos >= 0)
+            return OK_PRESS;
+
+    case FREE_PRESS:
+        frame = true;
+        if (d_clear)
+            display.fillScreen(ST7735_BLACK);
+        pos = 0;
+        page = 0;
+        return FREE_PRESS;
+
+    case FREE_LONG_PRESS:
+
+        System::light_sleep();
+        break;
+
+    default:
+        break;
+    }
+
+    return 0;
+}
 
 uint8_t Menu::base_menu_logic(String MenuName, uint8_t buttonEvent, const std::vector<String> &vec, int &pos, bool clearDisplay)
 {
     static int page = 0;
 
-    status_bar((pos < 0) ? buttonEvent : 0, MenuName);
+    status_bar((pos < 0) ? buttonEvent : 0);
 
     if (frame)
     {
@@ -769,7 +865,7 @@ uint8_t Menu::base_menu_logic(String MenuName, uint8_t buttonEvent, const std::m
     static int page = 0;
 
     // if pos < 0 forward buttons to status bar
-    status_bar((pos < 0) ? buttonEvent : 0, MenuName);
+    status_bar((pos < 0) ? buttonEvent : 0);
 
     if (frame)
     {

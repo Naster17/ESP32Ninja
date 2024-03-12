@@ -1,6 +1,6 @@
 /*BUILD MODE*/
 #define DEBUG
-#define ENABLE_IR
+// #define ENABLE_IR
 
 #ifdef ENABLE_IR
 #define IR_RECEIVER_PIN 22

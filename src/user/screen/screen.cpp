@@ -38,12 +38,11 @@ void Screen::brightness(uint8_t stat)
 
 void Screen::rotate(uint8_t m)
 {
-    if (SCREEN_HEIGHT == 160)
+    if (_SCREEN_HEIGHT == 160)
     {
-        SCREEN_WIDTH = 160;
-        SCREEN_HEIGHT = 128;
-        Serial.println(SCREEN_WIDTH);
-        Serial.println(SCREEN_HEIGHT);
+        _SCREEN_WIDTH = 160;
+        _SCREEN_HEIGHT = 128;
+
         crat = 14; // max ITEMS on display
         maxSym = 26;
         Drivers::Button::rotate(m);
@@ -51,10 +50,9 @@ void Screen::rotate(uint8_t m)
     }
     else
     {
-        SCREEN_WIDTH = 128;
-        SCREEN_HEIGHT = 160;
-        Serial.println(SCREEN_WIDTH);
-        Serial.println(SCREEN_HEIGHT);
+        _SCREEN_WIDTH = 128;
+        _SCREEN_HEIGHT = 160;
+
         crat = 18; // max ITEMS on display
         maxSym = 21;
         Drivers::Button::rotate(0);

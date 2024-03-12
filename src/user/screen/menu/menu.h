@@ -12,11 +12,12 @@ class Menu : private Screen
 public:
     static uint8_t base_menu_logic(String MenuName, uint8_t buttonEvent, const std::vector<String> &vec, int &pos, bool clearDisplay);
     static uint8_t base_menu_logic(String MenuName, uint8_t buttonEvent, const std::map<String, std::vector<String>> &MenuI, int &pos, int &mapPos, bool clearDisplay);
+    static uint8_t base_menu_image_logic(uint8_t buttonEvent, const std::vector<String> &vec, const std::map<String, String> &dataset, bool d_clear);
 
     static void print(String text);
 
     static void main_menu();
-    static uint8_t status_bar(uint8_t buttonEvent, String text);
+    static uint8_t status_bar(uint8_t buttonEvent);
     static void status_line(int color);
     // wifi
     static void menu_wifi();
@@ -41,6 +42,8 @@ public:
     static void menu_apps();
     static void menu_system_check();
 
+    //
+    static void menu_explorer();
     // keyboards
     static String num_keyboard(String input_field = "> ");
 };
