@@ -1,4 +1,5 @@
 <h1> ESP32Ninja (Early Beta) </h1>
+<h3>Development paused becouse hardware part is dead. And i don't want to rebuild it</h3>
 <p align="center">
   <img src="https://github.com/Naster17/ESP32Ninja/assets/62520991/5a8b3e1c-1072-4395-9ce1-db7b77c0b132" alt="My setup" style="max-width: 100%; height: auto;">
 </p>
